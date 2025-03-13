@@ -1,0 +1,101 @@
+<div class="fav_product">
+  {% for block in section.blocks %}
+  <div class="fav_vanilla">
+    <div class="fav_vanilla_box">
+      <div class="fav__vanilla">
+        <h1 class="flavour_new">{{ block.settings.title }}</h1>
+        <div class="flavour_subhead">
+          <p class="flavour_p">{{ block.settings.tag }}</p>
+          <div class="flavour_name">
+            {{ block.settings.subheading }}
+          </div>
+        </div>
+      </div>
+      <div class="fav_vanilla_img">
+        {% if block.settings.image != blank %}
+        <img src="{{ block.settings.image | img_url: 'master' }}" width="250" height="250">
+        {% endif %}
+      </div>
+    </div>
+    <div class="fav_vanilla_text">
+      <p class="flavour_text">
+        {{ block.settings.textarea }}
+      </p>
+    </div>
+  </div>
+  {% endfor %}
+  {% comment %}
+  <div class="fav_vanilla">
+    <div class="fav_vanilla_box">
+      <div class="fav__vanilla">
+        <h1 class="flavour_new">DARK CHOCOLATE</h1>
+        <div class="flavour_subhead">
+          <p class="flavour_p">Tasting Notes</p>
+          <h2 class="flavour_name">
+            FUDGE BROWNIE <br>
+            SEA SALT <br>
+            SMOOTH CREAM
+          </h2>
+        </div>
+      </div>
+      <div class="fav_vanilla_img">
+        <img src="https://cdn.shopify.com/s/files/1/0774/5775/2344/files/vanilla_explosion_1.png?v=1726058432">
+      </div>
+    </div>
+    <div class="fav_vanilla_text">
+      <p class="flavour_text">
+        Simply mix into water or your favorite milk (almond, oat, soy – you pick) for a creamy treat. Our cocoa is
+        authentic and non-alkalized. Creating a flavor experience, not to mention a hefty serving of antioxidants. True
+        cocoa comes with a heap of flavonoids that nutritionally support cardiovascular health. Mineral-rich, cocoa
+        provides a magnesium boost to help support blood sugar balance and digestion.
+      </p>
+    </div>
+  </div>
+  {% endcomment %}
+</div>
+{% schema %}
+  {
+    "name": "Flavors Section",
+    "settings": [
+        
+    ],
+    "blocks": [
+      {
+         "type": "flavors",
+         "name": "Flavors",
+         "settings": [
+           {
+              "type": "text",
+              "id": "title",
+              "label": "Heading"
+           },
+           {
+              "type": "text",
+              "id": "tag",
+              "label": "Tag"
+           },
+           {
+              "type": "richtext",
+              "id": "subheading",
+              "label": "Sub Heading"
+           },
+           {
+              "type": "image_picker",
+              "id": "image",
+              "label": "Image"
+           },
+           {
+              "type": "textarea",
+              "id": "textarea",
+              "label": "Content"
+           }
+         ]
+      }
+    ],
+    "presets": [
+      {
+        "name": "Flavors Section"
+      }
+    ]
+  }
+{% endschema %}

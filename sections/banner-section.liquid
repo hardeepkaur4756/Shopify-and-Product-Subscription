@@ -1,0 +1,86 @@
+<div class="banner_section">
+  <div class="page-width">
+     <div class="banner_inner_sec">
+        <div class="left_col">
+            <div class="banner_content">
+                <h1>{{ section.settings.banner_title }}</h1>
+                <p>{{ section.settings.banner_sub_title }}</p>
+                <a href="{{ section.settings.btn_url }}">{{ section.settings.btn_text }}</a>
+            </div>
+        </div>
+        <div class="right_col">
+           <div class="banner_img">
+              {% if section.settings.right_img != blank %}
+              <img src="{{ section.settings.right_img | img_url: 'master' }}" width="618" height="100" loading="lazy">
+              {% endif %}  
+           </div>
+        </div>
+     </div>
+     <div class="as_seen_sec">
+        <div class="as_seentext">{{ section.settings.as_seen_text }}</div>
+        <div class="banner_logos">
+           {% if section.settings.as_seen_logo != blank %}
+           <img src="{{ section.settings.as_seen_logo | img_url: 'master' }}"  width="792" height="40" loading="lazy" />
+           {% endif %}  
+        </div>
+     </div>
+  </div>
+</div>
+<style>
+  .banner_section {
+     background-image: url({% if section.settings.bg_img != blank %}{{ section.settings.bg_img | img_url: 'master' }}{% endif %}) !important;
+  }
+</style>
+
+{% schema %}
+  {
+    "name": "Banner Section",
+    "settings": [
+        {
+           "type": "image_picker",
+           "id": "bg_img",
+           "label": "Background Image"
+        },
+        {
+           "type": "text",
+           "id": "banner_title",
+           "label": "Title"
+        },
+        {
+           "type": "text",
+           "id": "banner_sub_title",
+           "label": "Sub Title"
+        },
+        {
+           "type": "text",
+           "id": "btn_text",
+           "label": "Button Text"
+        },
+        {
+           "type": "url",
+           "id": "btn_url",
+           "label": "Button URL"
+        },
+        {
+           "type": "image_picker",
+           "id": "right_img",
+           "label": "Image"
+        },
+        {
+           "type": "text",
+           "id": "as_seen_text",
+           "label": "As Seen Text"
+        },
+        {
+           "type": "image_picker",
+           "id": "as_seen_logo",
+           "label": "Logos"
+        }
+    ],
+    "presets": [
+       {
+         "name": "Banner Section"
+       }
+    ]
+  }
+{% endschema %}

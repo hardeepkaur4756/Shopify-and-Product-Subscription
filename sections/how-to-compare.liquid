@@ -1,0 +1,93 @@
+<div class="how_we_compare">
+  <div class="compare_yellow">
+    {% if section.settings.sec_img != blank %}
+      <img src="{{ section.settings.sec_img | img_url: "master" }}">
+    {% endif %}
+    <h1 class="price_matter">{{ section.settings.left_title }}</h1>
+  </div>
+  <div class="how_compare">
+    <h1 class="compare_heading">{{ section.settings.main_title }}</h1>
+    <p class="compare_p">
+      {{ section.settings.content }}
+    </p>
+    <div class="yellow_logo_box">
+      {% for block in section.blocks %}
+        <div class="yellow_img">
+          {% if block.settings.icon != blank %}
+            <div class="img_yellow">
+              <img src="{{ block.settings.icon | img_url: 'master' }}">
+            </div>
+          {% endif %}
+          <div class="yellow_img_para">
+            <p class="yellow_whey">{{ block.settings.content }}</p>
+          </div>
+        </div>
+      {% endfor %}
+      {% comment %}
+        <div class="yellow_img">
+          <img src="https://cdn.shopify.com/s/files/1/0774/5775/2344/files/Layer_1_1.png?v=1726055422">
+          <div class="yellow_img_para">
+            <p class="yellow_whey">$0.10 - $0.13 per gram of protein (depending on package selected).</p>
+          </div>
+        </div>
+        <div class="yellow_img">
+          <img src="https://cdn.shopify.com/s/files/1/0774/5775/2344/files/Layer_1_2.png?v=1726055421">
+          <div class="yellow_img_para">
+            <p class="yellow_whey">High end plant-based protein $0.10 – $0.16 per gram of protein.</p>
+          </div>
+        </div>
+      {% endcomment %}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "How to Compare",
+  "settings": [
+      {
+         "type": "image_picker",
+         "id": "sec_img",
+         "label": "Main Image"
+      },
+      {
+         "type": "text",
+         "id": "left_title",
+         "label": "Left Title"
+      },
+      {
+         "type": "text",
+         "id": "main_title",
+         "label": "Main Title"
+      },
+      {
+         "type": "textarea",
+         "id": "content",
+         "label": "Content"
+      }
+  ],
+  "blocks": [
+    {
+       "type": "icons",
+       "name": "Icons",
+      "settings": [
+        {
+           "type": "image_picker",
+           "id": "icon",
+           "label": "Icon"
+        },
+        {
+           "type": "textarea",
+           "id": "content",
+           "label": "Content"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "How to Compare"
+    }
+  ]
+}
+{% endschema %}

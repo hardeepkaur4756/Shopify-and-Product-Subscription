@@ -1,0 +1,71 @@
+<div class="key_protien">
+  <div class="key_protein_heading_box">
+    <h2 class="key_protein_heading">{{ section.settings.main_title }}</h2>
+  </div>
+  <div class="key_protein_box">
+   {% for block in section.blocks %}
+    <div class="key_box">
+      {% if block.settings.image != blank %}
+      <img src="{{ block.settings.image | img_url: "master" }}" width="250" height="300">
+      {% endif %}
+      <h2 class="key_heading">{{ block.settings.title }}</h2>
+      <p class="key_para">
+        {{ block.settings.content }}
+      </p>
+    </div>
+   {% endfor %} 
+  </div>
+  <div class="specialy_selected_button">
+    <a class="specialy_selected" href="{{ section.settings.btn_url }}">{{ section.settings.btn_text }}</a>
+  </div>
+</div>
+{% schema %}
+  {
+    "name": "Product Ingredients",
+    "settings": [
+        {
+          "type": "text",
+          "id": "main_title",
+          "label": "Heading"
+        },
+        {
+          "type": "text",
+          "id": "btn_text",
+          "label": "Button Text"
+        },
+        {
+          "type": "url",
+          "id": "btn_url",
+          "label": "Button URL"
+        }
+    ],
+    "blocks": [
+      {
+         "type": "text",
+         "name": "Text Block",
+         "settings": [
+           {
+             "type": "image_picker",
+             "id": "image",
+             "label": "Image"
+           },
+           {
+             "type": "text",
+             "id": "title",
+             "label": "Image"
+           },
+           {
+             "type": "textarea",
+             "id": "content",
+             "label": "Content"
+           }
+         ]
+      }
+    ],
+    "presets": [
+       {
+         "name": "Product Ingredients"
+       }
+    ]
+  }
+{% endschema %}

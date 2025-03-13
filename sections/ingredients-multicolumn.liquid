@@ -1,0 +1,793 @@
+{%- style -%}
+  #shopify-section-{{ section.id }} {
+    --section-padding-top: {{ section.settings.padding_top }}px;
+    --section-padding-bottom: {{ section.settings.padding_bottom }}px;
+    --image-position: {{ section.settings.image_position }};
+  }
+{%- endstyle -%}
+
+{{ 'section-multicolumn.css' | asset_url | stylesheet_tag }}
+
+<link rel="stylesheet" href="{{ 'component-slider.css' | asset_url }}" media="print" onload="this.media='all'">
+<noscript>{{ 'component-slider.css' | asset_url | stylesheet_tag }}</noscript>
+
+<div class="section--padding{% if section.settings.show_divider %} section--divider{% endif %}">
+  <div class="ingredients-multicolumn multicolumn page-width">
+    <div class="title-wrapper{% if section.settings.heading == blank %} title-wrapper--no-heading{% endif %} {{ section.settings.text_alignment }} mobile-{{ section.settings.mobile_text_alignment }} {{ section.settings.heading_alignment }}">
+      <{{ section.settings.heading_tag }} class="title {{ section.settings.heading_size }}">
+        {{- section.settings.heading | escape -}}
+      </{{ section.settings.heading_tag }}>
+    </div>
+
+    <slider-component class="slider-mobile-gutter {{ section.settings.text_alignment }} mobile-{{ section.settings.mobile_text_alignment }}">
+      <ul
+        id="Slider-{{ section.id }}"
+        class="multicolumn-list grid grid--2-col{% if section.settings.columns_mobile == '1' %} grid--1-col-mobile{% endif %} grid--{{ section.settings.columns_desktop }}-col-desktop{% if section.settings.swipe_on_mobile and section.blocks.size > 1 %} slider slider--mobile{% endif %}"
+        role="list"
+      >
+        {%- liquid
+          if section.settings.image_ratio == 'adapt'
+            assign highest_ratio = 0
+            for block in section.blocks
+              if block.settings.image.aspect_ratio > highest_ratio
+                assign highest_ratio = block.settings.image.aspect_ratio
+              endif
+            endfor
+          endif
+        -%}
+
+        {%- for block in section.blocks -%}
+          <li
+            id="Slide-{{ section.id }}-{{ forloop.index }}"
+            class="multicolumn-list__item grid__item{% if section.settings.swipe_on_mobile %} slider__slide{% endif %} {{ section.settings.text_alignment }}"
+            {{ block.shopify_attributes }}
+          >
+            <div class="multicolumn-card">
+              {%- if block.settings.image != blank -%}
+                <use-animate
+                  data-animate="zoom-fade"
+                  class="media-wrapper multicolumn-card__image-wrapper multicolumn-card__image-wrapper--{{ section.settings.image_width }}-width{% if section.settings.image_width != 'full' %} multicolumn-card-spacing{% endif %}"
+                >
+                  <div
+                    class="image-animate media media--{{ section.settings.image_ratio }}"
+                    {%- if section.settings.image_ratio == 'adapt' %}
+                      style="--image-ratio-percent: {{ 1 | divided_by: highest_ratio | times: 100 }}%;"
+                    {% endif -%}
+                  >
+                    {%- liquid
+                      assign number_of_columns = section.settings.columns_desktop
+                      assign number_of_columns_mobile = section.settings.columns_mobile
+                      assign grid_space_desktop = number_of_columns | minus: 1 | times: 30 | plus: 100 | append: 'px'
+                      assign grid_space_tablet = number_of_columns_mobile | minus: 1 | times: 30 | plus: 100 | append: 'px'
+                      assign grid_space_mobile = number_of_columns_mobile | minus: 1 | times: 30 | divided_by: 2 | plus: 30 | append: 'px'
+                      if section.settings.image_width == 'half'
+                        assign image_width = 0.5
+                      elsif section.settings.image_width == 'third'
+                        assign image_width = 0.33
+                      else
+                        assign image_width = 1
+                      endif
+                    -%}
+                    {% capture sizes %}
+                      (min-width: {{ settings.page_width }}px) calc(({{ settings.page_width }}px - {{ grid_space_desktop }}) * {{ image_width }} /  {{ number_of_columns }}),
+                      (min-width: 990px) calc((100vw - {{ grid_space_desktop }}) * {{ image_width }} / {{ number_of_columns }}),
+                      (min-width: 750px) calc((100vw - {{ grid_space_tablet }}) * {{ image_width }} / {{ number_of_columns_mobile }}),
+                      calc((100vw - {{ grid_space_mobile }}) * {{ image_width }} / {{ number_of_columns_mobile }})
+                    {% endcapture %}
+                    {{
+                      block.settings.image
+                      | image_url: width: 3200
+                      | image_tag:
+                        loading: 'lazy',
+                        widths: '50, 75, 100, 150, 200, 300, 400, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3200',
+                        sizes: sizes,
+                        class: 'multicolumn-card__image',
+                        is: 'lazy-image'
+                    }}
+                  </div>
+                  {%- if block.settings.button_link != blank -%}
+                    <a href="{{ block.settings.button_link }}" class="full-unstyled-link">&nbsp;</a>
+                  {%- endif -%}
+                </use-animate>
+              {%- endif -%}
+              {%- if block.settings.title != blank
+                or block.settings.text != blank
+                or block.settings.button_label != blank
+              -%}
+                <div class="multicolumn-card__info">
+                  <p class="multicolumn-card__title {{ block.settings.title_size }}">
+                    {{ block.settings.title | escape }}
+                  </p>
+                  <div class="rte typeset" style="display: none;">{{ block.settings.text }}</div>
+                  {%- if block.settings.button_label != blank -%}
+                    {%- if block.settings.button_style_secondary -%}
+                      <a
+                        class="button button--cta"
+                        {% if block.settings.button_link != blank %}
+                          href="{{ block.settings.button_link }}"
+                        {% else %}
+                          role="link" aria-disabled="true"
+                        {% endif %}
+                      >
+                        <span class="label">{{ block.settings.button_label | escape }}</span>
+                        {% render 'icon', icon: 'arrow' %}
+                      </a>
+                    {%- else -%}
+                      {% comment %}
+                      <a
+                        class="button button--tertiary"
+                        {% if block.settings.button_link != blank %}
+                          href="{{ block.settings.button_link }}"
+                        {% else %}
+                          role="link" aria-disabled="true"
+                        {% endif %}
+                      >
+                        {{ block.settings.button_label | escape }}
+                      </a>
+                      {% endcomment %}
+                      <button class="button button--tertiary popup-button">{{ block.settings.button_label | escape }}</button>
+                    {%- endif -%}
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+            </div>
+
+            <div class="ingredients_context" style="display: none">
+              {{ block.settings.context }}
+            </div>
+            <div class="ingredients_why_special" style="display: none">
+              {{ block.settings.why_special }}
+            </div>
+            <div class="ingredients_benefits" style="display: none">
+              {{ block.settings.benefits }}
+            </div>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </slider-component>
+  </div>
+</div>
+
+<style>
+
+    .overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        z-index: 999;
+    }
+   
+    .popup {
+        display: none;
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .popup-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: #dfdfd8;
+        width: 600px;
+        max-width:100%;
+        border-radius: 18px;
+        padding: 30px 30px 20px;
+        position:relative;
+    }
+
+    .popup.show {
+        display: block;
+        opacity: 1;
+        transform: unset;
+        position:static;
+        background-color: transparent;
+        padding: 0;
+    }
+   .popup_outer:has(.popup.show ) {
+      position: fixed;
+      top: 0px;
+      left: 0px;
+      right: 0px;
+      bottom: 0px;
+      overflow: auto;
+      opacity: 1;
+      display: flex;
+      justify-content: center;
+       z-index:9999;
+       padding-top:20px;
+       padding-bottom:20px;
+    }
+
+    .close {
+      cursor: pointer;
+      margin-bottom: 0;
+      height: 20px;
+      width: 20px;
+      line-height: normal;
+      display: flex;
+      align-items: flex-start !important;
+      justify-content: center !important;
+      border: 1px solid #000000;
+      padding: 0;
+      border-radius: 50px;
+      font-size: 14px;
+      position: absolute;
+      right: 15px;
+      top: 20px;
+    }
+     .inner_content .ingredients_img img {
+      width: 200px;
+      border-top: 2px solid #000000;
+      border-bottom: 2px solid #000000;
+      padding: 20px 0px;
+      margin: 10px 0 !important;
+  }
+      .inner_content .ingredients_img {
+          text-align: center;
+      }
+
+
+     .ingredients_main_title {
+        font-size: 48px;
+        text-align: center;
+        font-family: 'Font-1699382700741';
+        font-weight: 700;
+           line-height: 58px;
+    }
+     .ingredients_cont_sec label {
+        text-align: center;
+        display: block;
+        text-transform: uppercase;
+        font-weight: 700;
+        font-size: 14px;
+        letter-spacing: 3px;
+    }
+     .ingredients_cont_sec .ingredients_context ,.ingredients_cont_sec .ingredients_why_special,.ingredients_cont_sec .ingredients_benefits{
+        font-size: 13px;
+        text-align: center;
+        line-height: 18px;
+           margin-bottom: 20px;
+    }
+
+  @media only screen and (max-width:615.5px){
+    .popup_outer:has(.popup.show ) {
+      left: 10px !important;
+      right: 10px !important;
+    }
+    .ingredients_main_title {
+        font-size: 36px !important;
+        line-height: 46px !important;
+    }
+    .inner_content .ingredients_img img {
+        width: 170px;
+        margin: 10px 0 !important;
+    }
+    .popup-content {
+        padding: 30px 20px 20px;
+        border-radius: 10px !important;
+        width: 100%; 
+    }
+    .close {
+        right: 10px;
+        top: 10px;
+    }
+  }
+
+  
+</style>
+<div id="overlay-{{ section.id }}" class="overlay"></div>
+<div class="popup_outer">
+  <div id="popup-{{ section.id }}" class="popup">
+    <div class="popup-content">
+      <span class="close" id="close-{{ section.id }}">&times;</span>
+      <div class="inner_content">
+        <div class="ingredients_main_title" id="ingredients_main_title-{{ section.id }}"></div>
+        <div class="ingredients_img">
+          <img id="ingredients_img-{{ section.id }}" src="" alt="">
+        </div>
+        <div class="ingredients_cont_sec">
+          <div class="ingredients_context" id="col_desc-{{ section.id }}"></div>
+          <label>{{ section.settings.context }}</label>
+          <div class="ingredients_context" id="ingredients_context-{{ section.id }}"></div>
+          <label>{{ section.settings.special }}</label>
+          <div class="ingredients_why_special" id="ingredients_why_special-{{ section.id }}"></div>
+          <label>{{ section.settings.benefits }}</label>
+          <div class="ingredients_benefits" id="ingredients_benefits-{{ section.id }}"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  	document.addEventListener('DOMContentLoaded', () => {
+      const buttons = document.querySelectorAll('#shopify-section-{{ section.id }} .popup-button');
+      const popup = document.getElementById('popup-{{ section.id }}');
+      const overlay = document.getElementById('overlay-{{ section.id }}');
+      const popupHeading = document.getElementById('ingredients_main_title-{{ section.id }}');
+      const desc = document.getElementById('col_desc-{{ section.id }}');
+      const popupImage = document.getElementById('ingredients_img-{{ section.id }}');
+      const context = document.getElementById('ingredients_context-{{ section.id }}');
+      const why_special = document.getElementById('ingredients_why_special-{{ section.id }}');
+      const benefits = document.getElementById('ingredients_benefits-{{ section.id }}');
+      const closeBtn = document.querySelector('#close-{{ section.id }}');
+
+      buttons.forEach(button => {
+          button.addEventListener('click', (event) => {
+              const listItem = event.target.closest('li');
+              const heading = listItem.querySelector('.multicolumn-card__title').textContent;
+              const colldesc = listItem.querySelector('.rte').textContent;
+              const imageSrc = listItem.querySelector('img').src;
+              const ingredients_context = listItem.querySelector('.ingredients_context').textContent;
+              const ingredients_why_special = listItem.querySelector('.ingredients_why_special').textContent;
+              const ingredients_benefits = listItem.querySelector('.ingredients_benefits').textContent;
+
+            console.log(colldesc);
+            
+              popupHeading.textContent = heading;
+              desc.textContent = colldesc;
+              context.textContent = ingredients_context;
+              why_special.textContent = ingredients_why_special;
+              benefits.textContent = ingredients_benefits;
+              popupImage.src = imageSrc;
+
+              popup.classList.add('show');
+              overlay.style.display = 'block';
+          });
+      });
+
+      closeBtn.addEventListener('click', () => {
+          popup.classList.remove('show');
+          overlay.style.display = 'none';
+      });
+
+      overlay.addEventListener('click', () => {
+          popup.classList.remove('show');
+          overlay.style.display = 'none';
+      });
+
+      window.addEventListener('click', (event) => {
+          if (event.target === overlay) {
+              popup.classList.remove('show');
+              overlay.style.display = 'none';
+          }
+      });
+  });
+
+  $(".multicolumn-card .media img").click(function(){
+   $(this).parents(".multicolumn-card").find(".popup-button").trigger("click"); 
+  });
+  
+</script>
+
+<style>
+  .multicolumn-card .media img{
+  cursor: pointer;        
+  }
+</style>
+{% schema %}
+{
+  "name": "Ingredients Multicolumn",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "context",
+      "label": "Context Label"
+    },
+    {
+      "type": "text",
+      "id": "special",
+      "label": "Special Label"
+    },
+    {
+      "type": "text",
+      "id": "benefits",
+      "label": "Benefits Label"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "options": [
+        {
+          "value": "adapt",
+          "label": "t:sections.all.card_image_ratio.options__1.label"
+        },
+        {
+          "value": "square",
+          "label": "t:sections.all.card_image_ratio.options__2.label"
+        },
+        {
+          "value": "portrait",
+          "label": "t:sections.all.card_image_ratio.options__3.label"
+        },
+        {
+          "value": "landscape",
+          "label": "t:sections.all.card_image_ratio.options__4.label"
+        },
+        {
+          "value": "wide",
+          "label": "t:sections.all.card_image_ratio.options__5.label"
+        }
+      ],
+      "default": "landscape",
+      "label": "t:sections.all.card_image_ratio.label"
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "options": [
+        {
+          "value": "20% 0",
+          "label": "t:sections.all.image_position.options__1.label"
+        },
+        {
+          "value": "top center",
+          "label": "t:sections.all.image_position.options__2.label"
+        },
+        {
+          "value": "80% 0",
+          "label": "t:sections.all.image_position.options__3.label"
+        },
+        {
+          "value": "20% 50%",
+          "label": "t:sections.all.image_position.options__4.label"
+        },
+        {
+          "value": "center center",
+          "label": "t:sections.all.image_position.options__5.label"
+        },
+        {
+          "value": "80% 50%",
+          "label": "t:sections.all.image_position.options__6.label"
+        },
+        {
+          "value": "20% 100%",
+          "label": "t:sections.all.image_position.options__7.label"
+        },
+        {
+          "value": "bottom center",
+          "label": "t:sections.all.image_position.options__8.label"
+        },
+        {
+          "value": "80% 100%",
+          "label": "t:sections.all.image_position.options__9.label"
+        }
+      ],
+      "default": "center center",
+      "label": "t:sections.all.image_position.label",
+      "info": "t:sections.all.image_position.info"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:sections.all.text_alignment.options__1.label"
+        },
+        {
+          "value": "center",
+          "label": "t:sections.all.text_alignment.options__2.label"
+        },
+        {
+          "value": "right",
+          "label": "t:sections.all.text_alignment.options__3.label"
+        }
+      ],
+      "default": "left",
+      "label": "t:sections.all.text_alignment.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_divider",
+      "default": false,
+      "label": "t:sections.all.show_divider.label"
+    },
+    {
+      "type": "select",
+      "id": "image_width",
+      "options": [
+        {
+          "value": "third",
+          "label": "t:sections.multicolumn.settings.image_width.options__1.label"
+        },
+        {
+          "value": "half",
+          "label": "t:sections.multicolumn.settings.image_width.options__2.label"
+        },
+        {
+          "value": "full",
+          "label": "t:sections.multicolumn.settings.image_width.options__3.label"
+        }
+      ],
+      "default": "full",
+      "label": "t:sections.multicolumn.settings.image_width.label"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "default": 3,
+      "label": "t:sections.multicolumn.settings.columns_desktop.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.heading.label"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "default": "Multicolumn",
+      "label": "t:sections.all.heading.label"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "options": [
+        {
+          "value": "h2",
+          "label": "t:sections.all.heading_size.options__1.label"
+        },
+        {
+          "value": "h1",
+          "label": "t:sections.all.heading_size.options__2.label"
+        },
+        {
+          "value": "h0",
+          "label": "t:sections.all.heading_size.options__3.label"
+        }
+      ],
+      "default": "h1",
+      "label": "t:sections.all.heading_size.label"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "t:sections.all.heading_alignment.label",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:sections.all.heading_alignment.options__1.label"
+        },
+        {
+          "value": "center",
+          "label": "t:sections.all.heading_alignment.options__2.label"
+        },
+        {
+          "value": "right",
+          "label": "t:sections.all.heading_alignment.options__3.label"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "options": [
+        {
+          "value": "h1",
+          "label": "t:sections.all.heading_tag.options__1.label"
+        },
+        {
+          "value": "h2",
+          "label": "t:sections.all.heading_tag.options__2.label"
+        },
+        {
+          "value": "h3",
+          "label": "t:sections.all.heading_tag.options__3.label"
+        },
+        {
+          "value": "h4",
+          "label": "t:sections.all.heading_tag.options__4.label"
+        },
+        {
+          "value": "h5",
+          "label": "t:sections.all.heading_tag.options__5.label"
+        },
+        {
+          "value": "h6",
+          "label": "t:sections.all.heading_tag.options__6.label"
+        },
+        {
+          "value": "div",
+          "label": "t:sections.all.heading_tag.options__7.label"
+        },
+        {
+          "value": "span",
+          "label": "t:sections.all.heading_tag.options__8.label"
+        },
+        {
+          "value": "p",
+          "label": "t:sections.all.heading_tag.options__9.label"
+        }
+      ],
+      "default": "h2",
+      "label": "t:sections.all.heading_tag.label",
+      "info": "t:sections.all.heading_tag.info"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.mobile_layout.header.content"
+    },
+    {
+      "type": "select",
+      "id": "mobile_text_alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:sections.all.mobile_layout.mobile_text_alignment.options__1.label"
+        },
+        {
+          "value": "center",
+          "label": "t:sections.all.mobile_layout.mobile_text_alignment.options__2.label"
+        },
+        {
+          "value": "right",
+          "label": "t:sections.all.mobile_layout.mobile_text_alignment.options__3.label"
+        }
+      ],
+      "default": "left",
+      "label": "t:sections.all.mobile_layout.mobile_text_alignment.label"
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "options": [
+        {
+          "value": "1",
+          "label": "t:sections.all.mobile_layout.columns_mobile.options__1.label"
+        },
+        {
+          "value": "2",
+          "label": "t:sections.all.mobile_layout.columns_mobile.options__2.label"
+        }
+      ],
+      "default": "1",
+      "label": "t:sections.all.mobile_layout.columns_mobile.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "swipe_on_mobile",
+      "default": false,
+      "label": "t:sections.all.mobile_layout.swipe_on_mobile.label"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.header.content"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "t:sections.all.padding.padding_top.unit",
+      "label": "t:sections.all.padding.padding_top.label",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "t:sections.all.padding.padding_bottom.unit",
+      "label": "t:sections.all.padding.padding_bottom.label",
+      "default": 36
+    }
+  ],
+  "blocks": [
+    {
+      "type": "column",
+      "name": "t:sections.multicolumn.blocks.column.name",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "t:sections.all.image.label"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "default": "Column",
+          "label": "t:sections.all.heading.label"
+        },
+        {
+          "type": "select",
+          "id": "title_size",
+          "options": [
+            {
+              "value": "h4",
+              "label": "t:sections.all.heading_size.options__1.label"
+            },
+            {
+              "value": "h3",
+              "label": "t:sections.all.heading_size.options__2.label"
+            },
+            {
+              "value": "h2",
+              "label": "t:sections.all.heading_size.options__3.label"
+            }
+          ],
+          "default": "h3",
+          "label": "t:sections.all.heading_size.label"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "default": "<p>Pair text with an image to focus on your chosen product, collection, or blog post. Add details on availability, style, or even provide a review.</p>",
+          "label": "t:sections.all.text.label"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "default": "Button label",
+          "label": "t:sections.all.button_label.label",
+          "info": "t:sections.all.button_label.info"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "t:sections.all.button_link.label"
+        },
+        {
+          "type": "checkbox",
+          "id": "button_style_secondary",
+          "default": false,
+          "label": "t:sections.all.button_style_secondary.label"
+        },
+        {
+           "type": "header",
+           "content": "Ingredients"
+        },
+        {
+          "type": "textarea",
+          "id": "context",
+          "label": "Context"
+        },
+        {
+          "type": "textarea",
+          "id": "why_special",
+          "label": "Why Special"
+        },
+        {
+          "type": "textarea",
+          "id": "benefits",
+          "label": "Benefits"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Ingredients Multicolumn",
+      "blocks": [
+        {
+          "type": "column"
+        },
+        {
+          "type": "column"
+        },
+        {
+          "type": "column"
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "footer", "custom.overlay"]
+  }
+}
+{% endschema %}

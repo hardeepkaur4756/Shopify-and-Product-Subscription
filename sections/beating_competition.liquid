@@ -1,0 +1,26 @@
+<div class="beating_box">
+  <h1 class="beating_heading">{{ section.settings.main_heading }}</h1>
+  {{ section.settings.all_content }}
+</div>
+{% schema %}
+  {
+    "name": "Beating Competition",
+    "settings": [
+       {
+          "type": "text",
+          "id": "main_heading",
+          "label": "Main Title"
+       },
+      {
+          "type": "liquid",
+          "id": "all_content",
+          "label": "Content"
+       }
+    ],
+    "presets": [
+       {
+         "name": "Beating Competition"
+       }
+    ]
+  }
+{% endschema %}
